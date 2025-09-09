@@ -1,29 +1,27 @@
 #!/bin/bash
+# Legge il testo evidenziato col mouse in italiano usando pico2wave
 
-# Controlla se xclip e pico2wave sono installati
+# Controllo prerequisiti
 for cmd in xclip pico2wave aplay; do
     if ! command -v $cmd &>/dev/null; then
-        echo "Errore: $cmd non è installato."
-        echo "Installa con: sudo apt install xclip libttspico-utils alsa-utils"
+        echo "Errore: manca $cmd. Installa con: sudo apt install xclip libttspico-utils alsa-utils"
         exit 1
     fi
 done
 
-# Prende il testo evidenziato (primary selection)
+# Acquisizione testo selezionato
 TEXT=$(xclip -o -selection primary)
-
 if [ -z "$TEXT" ]; then
     echo "Nessun testo evidenziato col mouse."
     exit 1
 fi
 
-# Genera audio temporaneo e lo riproduce
+# Generazione e riproduzione audio
 TMPFILE="/tmp/pico_tts.wav"
-pico2wave -l=it-IT -w=$TMPFILE "$TEXT"
-aplay $TMPFILE &
+pico2wave -l=it-IT -w="$TMPFILE" "$TEXT"
+aplay "$TMPFILE" &
 PID=$!
 
-# Salva il PID per poter fermare la lettura
+# Salvataggio PID per fermare la lettura
 echo $PID > /tmp/pico_tts_pid
-echo "📖 Lettura in corso... per fermarla esegui ./ferma.sh"
-
+echo "Lettura in corso... per fermarla esegui ./ferma.sh"
